@@ -85,3 +85,83 @@ Para evaluar el comportamiento de los módulos y controladores del hipervisor, s
 **Justificación con base en las evidencias:**
 1. **Dependencia de un Sistema Operativo Base:** VirtualBox no se instala directamente sobre el hardware desnudo (*bare-metal*). Como se demostró en el entorno de trabajo, requiere que el sistema operativo **Windows 10 Pro** esté completamente cargado y en ejecución para poder iniciar.
 2. **Arquitectura de Módulos:** La ausencia del módulo de control `vboxdrv` dentro de la VM y su ejecución obligatoria en el espacio de kernel del Host confirman que el hipervisor funciona como una aplicación avanzada dentro de Windows, abstrayendo los recursos a través de las APIs del sistema operativo anfitrión en lugar de controlar el hardware de manera nativa.
+
+---
+
+## C. Exploración del Subsistema de E/S desde /proc y /sys (Tema 5.1)
+
+A continuación, se presentan las evidencias experimentales y el análisis técnico de la organización de Entrada/Salida (E/S) en la máquina virtual, obtenidas directamente desde el sistema de archivos virtual del kernel de Linux.
+### 1. Comando `cat /proc/interrupts`
+Este comando interactúa con un archivo dinámico del sistema de archivos `/proc` para mostrar la distribución y el conteo de las interrupciones en el sistema.
+
+#### Evidencia de Interrupciones (Parte 1):
+![Interrupciones parte 1](../capturas/proc-interrupts.1.jpg)
+
+#### Evidencia de Interrupciones (Parte 2):
+![Interrupciones parte 2](../capturas/proc-interrupts.2.jpg)
+
+* **Análisis de E/S:** Este archivo dinámico muestra qué controladores de dispositivos están enviando señales físicas de interrupción a los procesadores para notificar que un evento de Entrada/Salida requiere atención inmediata. Expone el conteo acumulado de estas peticiones distribuidas entre la CPU0 y la CPU1, permitiendo monitorear el flujo de trabajo en periféricos activos como el disco SATA (`ahci`) y la red (`enp0s3`).
+
+---
+
+### 2. Comando `cat /proc/iomem`
+Este comando detalla el mapa de ocupación de la memoria física del sistema por parte de los dispositivos de hardware.
+
+#### Evidencia de Mapa de Memoria (Parte 1):
+![Mapa de memoria parte 1](../capturas/proc-iomem.1.jpg)
+
+#### Evidencia de Mapa de Memoria (Parte 2):
+![Mapa de memoria parte 2](../capturas/proc-iomem.2.jpg)
+
+* **Análisis de E/S:** Este comando expone el mapa de la memoria física del sistema indicando los rangos de direcciones exclusivos reservados para la comunicación directa con los controladores de hardware. Permite verificar la implementación de la técnica *Memory-Mapped I/O* (MMIO), mediante la cual el kernel gestiona el intercambio de datos con la tarjeta gráfica (`vmwgfx`) o las de red (`e1000`) como si fuesen posiciones ordinarias de la RAM.
+
+---
+
+### 3. Comando `cat /proc/ioports`
+Este comando lista las regiones de puertos registradas para la comunicación por canales de E/S independientes.
+
+#### Evidencia de Puertos de E/S (Parte 1):
+![Puertos de E/S parte 1](../capturas/proc-ioports.1.jpg)
+
+#### Evidencia de Puertos de E/S (Parte 2):
+![Puertos de E/S parte 2](../capturas/proc-ioports.2.jpg)
+
+#### Evidencia de Puertos de E/S (Parte 3):
+![Puertos de E/S parte 3](../capturas/proc-ioports.3.jpg)
+
+* **Análisis de E/S:** Muestra el mapa de direcciones del espacio de canales aislado de 16 bits que utiliza el procesador para transmitir comandos de control y recibir estados de los periféricos emulados. Detalla los puertos específicos asignados mediante la técnica *Port-Mapped I/O* (PMIO) a controladores clásicos de E/S, tales como el temporizador del sistema, el teclado o los canales IDE (`ata_piix`).
+
+---
+
+### 4. Comando `cat /proc/devices`
+Este comando enumera los dispositivos cargados y sus números asociados, divididos por bloques y caracteres.
+
+#### Evidencia de Dispositivos del Kernel (Parte 1):
+![Dispositivos activos parte 1](../capturas/proc-devices.1.PNG)
+
+#### Evidencia de Dispositivos del Kernel (Parte 2):
+![Dispositivos activos parte 2](../capturas/proc-devices.2.PNG)
+
+#### Evidencia de Dispositivos del Kernel (Parte 3):
+![Dispositivos activos parte 3](../capturas/proc-devices.3.PNG)
+
+* **Análisis de E/S:** Registra todos los controladores de dispositivos activos en el kernel de Linux y los clasifica estrictamente de acuerdo con su método de transferencia y flujo de datos. Asigna a cada periférico de caracteres (flujo de bytes secuenciales) y de bloques (acceso aleatorio por sectores como los discos `sd`) un número mayor (*Major Number*) que actúa como enlace hacia su respectivo manejador de E/S.
+
+---
+
+### 5. Comando `lspci -v | head -80`
+Este comando interroga detalladamente al bus PCI para obtener información de los controladores físicos emulados por el hipervisor.
+
+#### Evidencia de Controladores del Bus PCI (Parte 1):
+![Controladores PCI parte 1](../capturas/lspci-pci.1.jpg)
+
+#### Evidencia de Controladores del Bus PCI (Parte 2):
+![Controladores PCI parte 2](../capturas/lspci-pci.2.jpg)
+
+#### Evidencia de Controladores del Bus PCI (Parte 3):
+![Controladores PCI parte 3](../capturas/lspci-pci.3.jpg)
+
+#### Evidencia de Controladores del Bus PCI (Parte 4):
+![Controladores PCI parte 4](../capturas/lspci-pci.4.jpg)
+
+* **Análisis de E/S:** Interroga de forma directa al bus de interconexión de componentes periféricos (PCI) de la máquina virtual para listar las propiedades de las tarjetas y controladores físicos emulados por el hipervisor. Revela detalladamente los recursos de Entrada/Salida que ocupa cada dispositivo (puertos y memoria asignada) junto con el módulo o *driver* del kernel (`e1000`, `ahci`, `vboxguest`) acoplado para controlarlos.
