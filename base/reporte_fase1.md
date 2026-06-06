@@ -15,7 +15,7 @@ La máquina virtual ha sido configurada y verificada con los parámetros técnic
 - **Sistema Operativo:** Ubuntu 24.04.4 LTS Desktop (64-bit)
 - **Memoria RAM:** 3072 MB (3 GB asignados, superando el mínimo requerido de 2 GB para mitigar problemas de *thrashing*).
 
-![Configuración de Memoria Base](../capturas/configuracion-vm1.jpg)
+![Configuración de Memoria Base](../capturas/configuracion-vm1.PNG)
 
 ---
 
@@ -23,7 +23,7 @@ La máquina virtual ha sido configurada y verificada con los parámetros técnic
 - **Procesador:** 2 núcleos asignados en la pestaña *Processor*.
 - **Capacidad de Ejecución:** 100% con soporte de virtualización por hardware habilitado por defecto en la pestaña de aceleración.
 
-![Configuración de Procesores](../capturas/configuracion-vm2.jpg)
+![Configuración de Procesores](../capturas/configuracion-vm2.PNG)
 
 ---
 
@@ -35,10 +35,10 @@ Para garantizar tanto el acceso a internet de la máquina virtual como la admini
 - **Adaptador 2 (Interfaz de administración):** Configurado en modo **Adaptador sólo anfitrión (Host-Only)** utilizando el dispositivo virtual *VirtualBox Host-Only Ethernet Adapter*. Este entorno aislado proporcionará el direccionamiento IP estático o dinámico privado necesario para interactuar mediante SSH desde la terminal de nuestro anfitrión.
 
 #### Evidencia del Adaptador 1 (NAT):
-![Configuración Adaptador 1 NAT](../capturas/configuracion-vm3.jpg)
+![Configuración Adaptador 1 NAT](../capturas/configuracion-vm3.PNG)
 
 #### Evidencia del Adaptador 2 (Host-Only):
-![Configuración Adaptador 2 Host-Only](../capturas/configuracion-vm4.jpg)
+![Configuración Adaptador 2 Host-Only](../capturas/configuracion-vm4.PNG)
 
 ## Tema 6.1: Clasificación del Hypervisor
 
@@ -57,7 +57,7 @@ Al ejecutar comandos de auditoría de hardware en la terminal de la máquina vir
     * `Hypervisor vendor: KVM`
   * **Análisis:** Confirma que el procesador virtualizado tiene activas las extensiones de aceleración por hardware (Intel VT-x / AMD-V) heredadas del procesador físico del anfitrión, permitiendo una emulación eficiente.
 
-![Salida de systemd y lscpu](../capturas/systemd-y-lscpu.jpg)
+![Salida de systemd y lscpu](../capturas/systemd-y-lscpu.PNG)
 ---
 
 ### 2. Evidencia desde el ANFITRIÓN (Windows 10 Pro 22H2)
@@ -72,7 +72,7 @@ Para evaluar el comportamiento de los módulos y controladores del hipervisor, s
   * **Resultado obtenido:** `ERROR: Module vboxdrv not found.`
   * **Análisis y función del módulo:** Este error es **correcto y esperado** dentro de la VM. El módulo `vboxdrv` (VirtualBox Support Driver) es el controlador principal del hipervisor que **debe ejecutarse exclusivamente en el sistema operativo anfitrión (Windows 10)**. 
 
-![Ejecución de lsmod y error de modinfo](../capturas/k.jpg)
+![Ejecución de lsmod y error de modinfo](../capturas/k.PNG)
   
   **¿Qué hace el módulo `vboxdrv`?** Es el encargado de interactuar directamente con el núcleo (kernel) del sistema anfitrión para reservar memoria física, conmutar el contexto de la CPU hacia el modo de ejecución virtual y coordinar el acceso al hardware real. Al estar dentro de la máquina virtual, el sistema no tiene acceso a este módulo del host, lo que demuestra el aislamiento del entorno.
 
