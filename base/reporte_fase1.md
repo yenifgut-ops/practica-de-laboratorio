@@ -165,3 +165,194 @@ Este comando interroga detalladamente al bus PCI para obtener información de lo
 ![Controladores PCI parte 4](../capturas/lspci-pci.4.PNG)
 
 * **Análisis de E/S:** Interroga de forma directa al bus de interconexión de componentes periféricos (PCI) de la máquina virtual para listar las propiedades de las tarjetas y controladores físicos emulados por el hipervisor. Revela detalladamente los recursos de Entrada/Salida que ocupa cada dispositivo (puertos y memoria asignada) junto con el módulo o *driver* del kernel (`e1000`, `ahci`, `vboxguest`) acoplado para controlarlos.
+
+* ---
+
+* # C. Kernel Module Individual (Tema 5.3)
+
+## Compilación del módulo
+
+Se compiló el módulo del kernel utilizando el siguiente comando:
+
+```bash
+make -C /lib/modules/$(uname -r)/build M=$(pwd) modules
+```
+
+### Evidencia
+
+Captura:
+
+```text
+/capturas/compilacion_exitosa.jpg
+```
+
+La captura muestra la compilación exitosa del módulo y la generación del archivo:
+
+```text
+info_sistema.ko
+```
+
+---
+
+## Carga del módulo y verificación de mensajes del kernel
+
+Se cargó el módulo utilizando el siguiente comando:
+
+```bash
+sudo insmod info_sistema.ko && sudo dmesg | tail -8
+```
+
+### Evidencia
+
+Captura:
+
+```text
+/capturas/carga_modulo_dmesg.jpg
+```
+
+La captura muestra los mensajes generados por la función `init_module()` mediante `printk()`.
+
+---
+
+## Verificación del módulo cargado
+
+Para comprobar que el módulo fue cargado correctamente en memoria se ejecutó:
+
+```bash
+lsmod | grep info_sistema
+```
+
+### Evidencia
+
+Captura:
+
+```text
+/capturas/verificacion_lsmod.jpg
+```
+
+La salida confirma que el módulo permanece activo dentro del kernel.
+
+---
+
+## Descarga del módulo y verificación de limpieza
+
+Para retirar el módulo del kernel se ejecutó:
+
+```bash
+sudo rmmod info_sistema && sudo dmesg | tail -5
+```
+
+### Evidencia
+
+Captura:
+
+```text
+/capturas/modulo_descargado_cleanup.jpg
+```
+
+La captura muestra el mensaje emitido por la función `cleanup_module()`, indicando que el módulo fue descargado correctamente.
+
+---
+
+##  D. Emulación vs Paravirtualización en VirtualBox (Temas 6.1 y 6.2)
+
+### 1. Identificación de Dispositivos con `lspci -v`
+
+Al auditar los buses e interconexiones PCI de la máquina virtual con el comando `lspci -v`, se identificaron y clasificaron los componentes de acuerdo con su arquitectura de virtualización:
+
+#### Dispositivos Emulados (Vendor "InnoTek" / "Oracle")
+
+Se evidenció la presencia de periféricos del fabricante `InnoTek Systemberatung GmbH` (`VirtualBox Guest Service`), controladores de audio `Intel AC'97` que cargan el módulo nativo `snd_intel8x0`, y adaptadores de red clásicos **Intel Corporation 82540EM Gigabit Ethernet Controller** asociados al driver base **e1000**.
+
+#### Dispositivos Paravirtualizados (VirtIO)
+
+Al modificar la configuración de red en la interfaz de VirtualBox, el dispositivo mutó de forma lógica a un adaptador de alto rendimiento firmado por **Red Hat, Inc. Virtio network device**, el cual opera bajo la interfaz de comunicación directa **virtio-pci**.
+
+### Evidencia
+
+Agregar captura:
+
+```text
+/capturas/lspci_v.jpg
+```
+
+---
+
+### 2. Análisis de Controladores VirtIO con `lsmod` y `modinfo`
+
+Para verificar la integración de los componentes paravirtualizados dentro del espacio del núcleo, se auditaron los controladores activos mediante las herramientas del sistema.
+
+#### Verificación de módulos cargados
+
+```bash
+lsmod | grep virtio
+```
+
+**Resultado:** Se confirmó la coexistencia en memoria de los módulos críticos `virtio_net` (controlador específico de red) y `virtio_pci` (capa de transporte sobre el bus virtual).
+
+#### Consulta de metadatos
+
+```bash
+modinfo virtio_net
+```
+
+**Resultado:** El kernel expone que el módulo pertenece formalmente a la infraestructura de código abierto de Red Hat, diseñado específicamente como un canal de comunicación directa optimizado para hipervisores.
+
+### Evidencia
+
+Agregar capturas:
+
+```text
+/capturas/lsmod_virtio.jpg
+/capturas/modinfo_virtio_net.jpg
+```
+
+---
+
+### 3. Comparación de Mensajes de Inicialización en `dmesg` (Overhead)
+
+Para evaluar la sobrecarga de procesamiento de cada tecnología, se realizó un filtrado cruzado de los registros de arranque del sistema operativo huésped.
+
+```bash
+sudo dmesg | grep -E -i "e1000|virtio"
+```
+
+### Evidencia
+
+Agregar captura:
+
+```text
+/capturas/dmesg_e1000_virtio.jpg
+```
+
+### Análisis e Implicaciones de Rendimiento
+
+#### Controlador Emulado (`e1000`)
+
+Genera un bloque denso de múltiples líneas de log. Esto ocurre debido a la alta sobrecarga (overhead) de la emulación completa: el hipervisor debe invertir recursos para simular detalladamente registros físicos de hardware tradicional, negociación de enlaces de red y características heredadas del dispositivo.
+
+#### Controlador Paravirtualizado (`virtio_net`)
+
+Inicia de forma directa y limpia con una cantidad mínima de mensajes de log. Al eliminar la simulación completa de hardware, la comunicación entre el huésped y el hipervisor se realiza de forma más eficiente, reduciendo significativamente el consumo de recursos.
+
+---
+
+### 4. ¿Por qué la Paravirtualización requiere un Driver Especial y la Emulación no?
+
+Basándonos en la evidencia recolectada durante el laboratorio, se concluye lo siguiente:
+
+#### Emulación Completa
+
+La emulación completa no requiere controladores especiales porque VirtualBox presenta al sistema operativo huésped dispositivos virtuales que imitan hardware físico ampliamente conocido y soportado. Por ejemplo, la tarjeta de red Intel 82540EM utiliza el controlador estándar `e1000`, incluido por defecto en el kernel de Linux.
+
+#### Paravirtualización
+
+La paravirtualización sí requiere controladores especializados (`virtio`) debido a que los dispositivos VirtIO no representan hardware físico real. En su lugar, implementan canales de comunicación optimizados entre el sistema operativo huésped y el hipervisor. Por esta razón, el kernel necesita módulos específicos para comprender y utilizar estas interfaces virtuales.
+
+---
+
+
+
+
+
+
