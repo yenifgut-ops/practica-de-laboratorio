@@ -207,7 +207,7 @@ sudo insmod info_sistema.ko && sudo dmesg | tail -8
 Captura:
 
 
-![Compilacion del módulo kernel](/capturas/carga_modulo_dmesg.PNG)
+![Compilacion del módulo kernel](/capturas/carga_modulo_insmod.PNG)
 
 
 
