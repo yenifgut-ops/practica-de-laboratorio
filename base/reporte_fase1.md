@@ -15,7 +15,7 @@ La máquina virtual ha sido configurada y verificada con los parámetros técnic
 - **Sistema Operativo:** Ubuntu 24.04.4 LTS Desktop (64-bit)
 - **Memoria RAM:** 3072 MB (3 GB asignados, superando el mínimo requerido de 2 GB para mitigar problemas de *thrashing*).
 
-![Configuración de Memoria Base](../capturas/configuracion-vm1.PNG)
+![Configuración de Memoria Base](../capturas/configuracion_vm1.PNG)
 
 ---
 
@@ -23,7 +23,7 @@ La máquina virtual ha sido configurada y verificada con los parámetros técnic
 - **Procesador:** 2 núcleos asignados en la pestaña *Processor*.
 - **Capacidad de Ejecución:** 100% con soporte de virtualización por hardware habilitado por defecto en la pestaña de aceleración.
 
-![Configuración de Procesores](../capturas/configuracion-vm2.PNG)
+![Configuración de Procesores](../capturas/configuracion_vm2.PNG)
 
 ---
 
@@ -35,10 +35,10 @@ Para garantizar tanto el acceso a internet de la máquina virtual como la admini
 - **Adaptador 2 (Interfaz de administración):** Configurado en modo **Adaptador sólo anfitrión (Host-Only)** utilizando el dispositivo virtual *VirtualBox Host-Only Ethernet Adapter*. Este entorno aislado proporcionará el direccionamiento IP estático o dinámico privado necesario para interactuar mediante SSH desde la terminal de nuestro anfitrión.
 
 #### Evidencia del Adaptador 1 (NAT):
-![Configuración Adaptador 1 NAT](../capturas/configuracion-vm3.PNG)
+![Configuración Adaptador 1 NAT](../capturas/configuracion_vm3.PNG)
 
 #### Evidencia del Adaptador 2 (Host-Only):
-![Configuración Adaptador 2 Host-Only](../capturas/configuracion-vm4.PNG)
+![Configuración Adaptador 2 Host-Only](../capturas/configuracion_vm4.PNG)
 
 ## Tema 6.1: Clasificación del Hypervisor
 
@@ -182,13 +182,13 @@ make -C /lib/modules/$(uname -r)/build M=$(pwd) modules
 
 Captura:
 
-```text
-/capturas/compilacion_exitosa.jpg
-```
+
+![Compilacion del módulo kernel](/capturas/codigo_correcto.PNG)
+
 
 La captura muestra la compilación exitosa del módulo y la generación del archivo:
 
-```text
+```
 info_sistema.ko
 ```
 
@@ -198,7 +198,7 @@ info_sistema.ko
 
 Se cargó el módulo utilizando el siguiente comando:
 
-```bash
+```
 sudo insmod info_sistema.ko && sudo dmesg | tail -8
 ```
 
@@ -206,9 +206,10 @@ sudo insmod info_sistema.ko && sudo dmesg | tail -8
 
 Captura:
 
-```text
-/capturas/carga_modulo_dmesg.jpg
-```
+
+![Compilacion del módulo kernel](/capturas/carga_modulo_dmesg.PNG)
+
+
 
 La captura muestra los mensajes generados por la función `init_module()` mediante `printk()`.
 
@@ -218,7 +219,7 @@ La captura muestra los mensajes generados por la función `init_module()` median
 
 Para comprobar que el módulo fue cargado correctamente en memoria se ejecutó:
 
-```bash
+```
 lsmod | grep info_sistema
 ```
 
@@ -226,9 +227,9 @@ lsmod | grep info_sistema
 
 Captura:
 
-```text
-/capturas/verificacion_lsmod.jpg
-```
+
+![Cargando el módulo en la memoria](/capturas/verificacion_lsmod.PNG)
+
 
 La salida confirma que el módulo permanece activo dentro del kernel.
 
@@ -244,11 +245,7 @@ sudo rmmod info_sistema && sudo dmesg | tail -5
 
 ### Evidencia
 
-Captura:
-
-```text
-/capturas/modulo_descargado_cleanup.jpg
-```
+![Descarga del módulo](/capturas/sudo_rmmod.PNG)
 
 La captura muestra el mensaje emitido por la función `cleanup_module()`, indicando que el módulo fue descargado correctamente.
 
@@ -264,17 +261,32 @@ Al auditar los buses e interconexiones PCI de la máquina virtual con el comando
 
 Se evidenció la presencia de periféricos del fabricante `InnoTek Systemberatung GmbH` (`VirtualBox Guest Service`), controladores de audio `Intel AC'97` que cargan el módulo nativo `snd_intel8x0`, y adaptadores de red clásicos **Intel Corporation 82540EM Gigabit Ethernet Controller** asociados al driver base **e1000**.
 
+### Evidencia
+
+![Identificación de los componentes de virtualización](/capturas/lspci-v.1.PNG)
+
+![Identificación de los componentes de virtualización](/capturas/lspci-v.2.PNG)
+
+![Identificación de los componentes de virtualización](/capturas/lspci-v.3.PNG)
+
+![Identificación de los componentes de virtualización](/capturas/lspci-v.4.PNG)
+
+
 #### Dispositivos Paravirtualizados (VirtIO)
 
 Al modificar la configuración de red en la interfaz de VirtualBox, el dispositivo mutó de forma lógica a un adaptador de alto rendimiento firmado por **Red Hat, Inc. Virtio network device**, el cual opera bajo la interfaz de comunicación directa **virtio-pci**.
 
 ### Evidencia
 
-Agregar captura:
 
-```text
-/capturas/lspci_v.jpg
-```
+![Paravirtualizados virtIO](/capturas/lspci_con_virtio1.PNG)
+
+![Paravirtualizados virtIO](/capturas/lspci_con_virtio2.PNG)
+
+![Paravirtualizados virtIO](/capturas/lspci_con_virtio3.PNG)
+
+![Paravirtualizados virtIO](/capturas/lspci_con_virtio4.PNG)
+
 
 ---
 
@@ -300,12 +312,10 @@ modinfo virtio_net
 
 ### Evidencia
 
-Agregar capturas:
 
-```text
 /capturas/lsmod_virtio.jpg
-/capturas/modinfo_virtio_net.jpg
-```
+ ![Controladores virtIO](/capturas/comparacion_dmesg.PNG)
+
 
 ---
 
