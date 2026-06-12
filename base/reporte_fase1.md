@@ -355,4 +355,18 @@ La paravirtualización sí requiere controladores especializados (`virtio`) debi
 
 ---
 
-(ej. /dev/input/event7), dejándolo listo para herramientas como evtest.
+## Sección C — Especificación y Análisis del Kernel Module
+
+Para profundizar en la gestión de bajo nivel, se desarrolló un controlador dinámico en espacio de núcleo denominado `io_input_gutierrez_zerpa`. Este componente prescinde de las llamadas del espacio de usuario tradicionales, ejecutando operaciones de E/S de archivos directly desde el contexto del anillo 0 (*Kernel File I/O*).
+
+### Análisis de la Lógica de Implementación y Resultados
+
+1. **Estructura del Kernel File I/O (`filp_open` / `kernel_read`):** El módulo utiliza la API interna del núcleo para mapear `/proc/bus/input/devices`. Al cargarse, se abre el descriptor de manera síncrona bajo la bandera `O_RDONLY`, volcando el mapa binario hacia un buffer reservado dinámicamente en memoria física no paginada (*Non-swappable Kernel Memory*) mediante `kzalloc` y la bandera de prioridad `GFP_KERNEL`.
+
+2. **Algoritmo de Filtrado y Conteo:** El archivo virtual provisto por el subsistema `input` de Linux organiza cada periférico estructurando bloques de texto donde las propiedades físicas están precedidas por marcadores. La directiva **`N:`** define el nombre amigable (*Name*) del dispositivo (por ejemplo, *`N: Name="AT Translated Set 2 keyboard"`*). El módulo itera byte por byte sobre el buffer capturando cada secuencia correspondiente a un inicio de línea válido que empiece con este patrón exacto, aislando los descriptores irrelevantes.
+
+3. **Verificación de la Salida en `dmesg`:** Al interactuar directamente con la macro de logging del kernel (`printk`), el sistema reporta de forma segura el conteo en tiempo real:
+
+   > `io_input_gutierrez_zerpa: [PROCESAMIENTO EXITOSO] Se detectaron 6 dispositivos de entrada registrados.`
+
+   Esta cifra coincide con exactitud matemática con el número de manejadores de eventos funcionales mapeados por el kernel en las etapas dinámicas anteriores, validando la estabilidad técnica del módulo.
