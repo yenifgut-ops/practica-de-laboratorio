@@ -1,0 +1,16 @@
+[    2.530891] ahci 0000:00:0d.0: 1/1 ports implemented (port mask 0x1)
+[    2.530899] ahci 0000:00:0d.0: flags: 64bit ncq stag only ccc 
+[    2.542932] scsi host2: ahci
+[    2.543233] ata3: SATA max UDMA/133 abar m8192@0xf0842000 port 0xf0842100 irq 21 lpm-pol 1
+[    2.559947] hid: raw HID events driver (C) Jiri Kosina
+[    2.853955] ata3: SATA link up 3.0 Gbps (SStatus 123 SControl 300)
+[    2.854146] ata3.00: ATA-6: VBOX HARDDISK, 1.0, max UDMA/133
+[    2.854156] ata3.00: 41943040 sectors, multi 128: LBA48 NCQ (depth 32)
+[    2.854436] ata3.00: configured for UDMA/133
+[    2.858813] scsi 2:0:0:0: Direct-Access     ATA      VBOX HARDDISK    1.0  PQ: 0 ANSI: 5
+[    2.859061] sd 2:0:0:0: [sda] 41943040 512-byte logical blocks: (21.5 GB/20.0 GiB)
+[    2.859071] sd 2:0:0:0: [sda] Write Protect is off
+[    2.859073] sd 2:0:0:0: [sda] Mode Sense: 00 3a 00 00
+[    2.859084] sd 2:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[    2.859103] sd 2:0:0:0: [sda] Preferred minimum I/O size 512 bytes
+[    2.859758] sd 2:0:0:0: Attached scsi generic sg1 type 0
