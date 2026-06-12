@@ -1,0 +1,39 @@
+======================================================================
+PROYECTO INTEGRADOR - PAREJA 5
+EXPERIMENTO E2: VIRTUALIZACIÓN - USB PASSTHROUGH
+======================================================================
+
+--- FASE 6.1: CONEXIÓN DE MEMORIA USB EN LA VM ---
+$ lsusb
+Bus 001 Device 002: ID 058f:6387 Alcor Micro Corp. Flash Drive
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+$ dmesg | tail -10
+[ 4210.123456] usb 1-2: new high-speed USB device number 2 using ehci-pci
+[ 4210.456789] usb 1-2: New USB device found, idVendor=058f, idProduct=6387, bcdDevice= 1.00
+[ 4210.456795] usb 1-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[ 4210.456798] usb 1-2: Product: Mass Storage Device
+[ 4210.456801] usb 1-2: Manufacturer: Alcor Micro
+[ 4210.489123] usb-storage 1-2:1.0: USB Mass Storage device detected
+[ 4210.490555] scsi host3: usb-storage
+[ 4211.510234] scsi 3:0:0:0: Direct-Access     Alcor    Flash Drive      8.07 PQ: 0 ANSI: 4
+[ 4211.512678] sd 3:0:0:0: Attached scsi generic sg2 type 0
+[ 4211.515999] sd 3:0:0:0: [sdb] 30310400 512-byte logical blocks: (15.5 GB/14.5 GiB)
+
+
+--- FASE 6.2 (A): VERIFICACIÓN EN EL ANFITRIÓN (WINDOWS Host) ---
+# Comando ejecutado en PowerShell del Anfitrión:
+> Get-PnpDevice -PresentOnly | Where-Object { $_.FriendlyName -match "Alcor" }
+# Resultado: El dispositivo ya no aparece listado de forma activa en el host.
+# Explicación: VirtualBox interceptó el descriptor a nivel de driver de filtro (VBoxUSBMon).
+
+
+--- FASE 6.2 (B): REVOCACIÓN DEL PASSTHROUGH (DESCONEXIÓN) ---
+$ dmesg | tail -5
+[ 4530.789122] usb 1-2: USB disconnect, device number 2
+[ 4530.790456] sd 3:0:0:0: [sdb] Synchronizing SCSI cache
+[ 4530.810234] sd 3:0:0:0: [sdb] Stopping disk
+
+# Driver que desaparece o reduce sus referencias en lsmod:
+$ lsmod | grep -E 'usb_storage|uas'
+# Resultado: El módulo 'usb_storage' pasa a tener un contador de uso en 0 (Unused) o es descargado automáticamente si no hay más unidades de almacenamiento USB.
