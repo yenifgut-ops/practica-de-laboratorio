@@ -1,0 +1,13 @@
+[ 3306.536856] usb 2-2: new high-speed USB device number 4 using ehci-pci
+[ 3306.937144] usb 2-2: New USB device found, idVendor=04ca, idProduct=703c, bcdDevice= 0.17
+[ 3306.937155] usb 2-2: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[ 3306.937162] usb 2-2: Product: Integrated Camera
+[ 3306.937168] usb 2-2: Manufacturer: J8AFAE3LV
+[ 3307.070276] mc: Linux media interface: v0.10
+[ 3307.231997] videodev: Linux video capture interface: v2.00
+[ 3307.334999] usb 2-2: Found UVC 1.00 device Integrated Camera (04ca:703c)
+[ 3307.453351] usbcore: registered new interface driver uvcvideo
+[ 1856.288182] usb 2-1: new high-speed USB device number 3 using ehci-pci
+[ 1856.647108] usb 2-1: New USB device found, idVendor=1782, idProduct=4001, bcdDevice= 5.04
+[ 1856.647178] usb 2-1: Product: TECNO SPARK Go 2024
+[ 1856.647203] usb 2-1: Manufacturer: Unisoc
