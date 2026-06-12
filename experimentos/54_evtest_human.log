@@ -1,0 +1,5 @@
+Event: time 1717637821.102345, type 1 (EV_KEY), code 30 (KEY_A), value 1
+Event: time 1717637821.102345, -------------- SYN_REPORT ------------
+Event: time 1717637821.214567, type 1 (EV_KEY), code 30 (KEY_A), value 0
+Event: time 1717637821.214567, -------------- SYN_REPORT ------------
+Event: time 1717637821.450123, type 1 (EV_KEY), code 48 (KEY_B), value 1
