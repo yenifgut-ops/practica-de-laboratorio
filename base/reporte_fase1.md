@@ -296,7 +296,7 @@ Para verificar la integración de los componentes paravirtualizados dentro del e
 
 #### Verificación de módulos cargados
 
-```bash
+```
 lsmod | grep virtio
 ```
 
@@ -304,7 +304,7 @@ lsmod | grep virtio
 
 #### Consulta de metadatos
 
-```bash
+```
 modinfo virtio_net
 ```
 
@@ -312,9 +312,7 @@ modinfo virtio_net
 
 ### Evidencia
 
-
-/capturas/lsmod_virtio.jpg
- ![Controladores virtIO](/capturas/comparacion_dmesg.PNG)
+ ![Controladores virtIO](/capturas/modinfo_virtio.PNG)
 
 
 ---
@@ -329,11 +327,7 @@ sudo dmesg | grep -E -i "e1000|virtio"
 
 ### Evidencia
 
-Agregar captura:
-
-```text
-/capturas/dmesg_e1000_virtio.jpg
-```
+![Inicializacion de dmesg](/capturas/comparacion_dmesg.PNG)
 
 ### Análisis e Implicaciones de Rendimiento
 
